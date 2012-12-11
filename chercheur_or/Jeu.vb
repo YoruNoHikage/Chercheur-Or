@@ -2,8 +2,18 @@
     Const taille As Integer = 20
     Const largeurTile As Integer = 35, hauteurTile As Integer = 35
 
+    Dim couleurSelect As Color = ColorTranslator.FromHtml("0x008fff")
+    Dim couleur As Color = ColorTranslator.FromHtml("0xffffff")
+
     Dim terrain(taille, taille) As Integer
     Dim terrainAffichage(taille, taille) As PictureBox
+
+    Dim tableauJoueurs(5) As String
+    Dim dynamitesJoueurs() As Integer
+    Dim pepitesJoueurs() As Integer
+    Dim indiceJoueurEnCours As Integer
+
+    Dim tableauStatsJoueurs As List(Of Panel)
 
     Const nbPepites As Integer = 10, nbDynamites As Integer = 5
 
@@ -52,6 +62,103 @@
         genererDynamites()
 
         'Génération des statistiques (création dans le code pour plus de propreté et de précision)
+        genererStatsGlobales()
+
+        'Création des joueurs et de leurs statistiques
+        tableauJoueurs(0) = "Jean-Jacques"
+        tableauJoueurs(1) = "Jean-Philippe"
+        tableauJoueurs(2) = "Francis"
+        tableauJoueurs(3) = "Jean-Kevin"
+        tableauJoueurs(4) = "Jean-Christophe"
+
+        tableauStatsJoueurs = New List(Of Panel)
+
+        For i As Integer = 0 To Int(tableauJoueurs.Length) - 2
+            creerJoueur(i)
+        Next
+        tableauStatsJoueurs(0).BackColor = couleurSelect
+    End Sub
+
+    Private Sub creerJoueur(ByVal numJoueur)
+        tableauStatsJoueurs.Add(New Panel)
+        Dim origine As Point = New Point((taille + 1) * largeurTile, hauteurTile * (numJoueur + 1) * 2 + 5 * numJoueur + 20)
+        tableauStatsJoueurs(numJoueur).Location = origine
+        tableauStatsJoueurs(numJoueur).Size = New Size(largeurTile * 6 + 5, hauteurTile * 2)
+        tableauStatsJoueurs(numJoueur).BackColor = couleur
+        tableauStatsJoueurs(numJoueur).Visible = True
+
+        Dim nomJoueur As Label
+        nomJoueur = New Label
+        nomJoueur.Name = "joueur" & numJoueur
+        nomJoueur.Text = tableauJoueurs(numJoueur)
+        nomJoueur.Location = New Point(origine.X, origine.Y)
+        nomJoueur.Size = New Size(largeurTile * 6, hauteurTile)
+        nomJoueur.Visible = True
+        nomJoueur.BackColor = tableauStatsJoueurs(numJoueur).BackColor
+        nomJoueur.TextAlign = ContentAlignment.MiddleCenter
+        tableauStatsJoueurs(numJoueur).Controls.Add(nomJoueur)
+        Me.Controls.Add(nomJoueur)
+
+        Dim dynamitesImg As PictureBox = New PictureBox
+        dynamitesImg.Location = New Point(origine.X, origine.Y + hauteurTile)
+        dynamitesImg.Size = New Size(largeurTile, hauteurTile)
+        dynamitesImg.Image = My.Resources.dynamite
+        dynamitesImg.Visible = True
+        tableauStatsJoueurs(numJoueur).Controls.Add(dynamitesImg)
+        Me.Controls.Add(dynamitesImg)
+
+        Dim dynamites As Label = New Label
+        dynamites.Text = "0"
+        dynamites.Location = New Point(origine.X + largeurTile, origine.Y + hauteurTile)
+        dynamites.Size = New Size(largeurTile, hauteurTile)
+        dynamites.Visible = True
+        dynamites.BackColor = tableauStatsJoueurs(numJoueur).BackColor
+        dynamites.TextAlign = ContentAlignment.MiddleCenter
+        tableauStatsJoueurs(numJoueur).Controls.Add(dynamites)
+        Me.Controls.Add(dynamites)
+
+        Dim herbesImg As PictureBox = New PictureBox
+        herbesImg.Location = New Point(origine.X + largeurTile * 2, origine.Y + hauteurTile)
+        herbesImg.Size = New Size(largeurTile, hauteurTile)
+        herbesImg.Image = My.Resources.herbe
+        herbesImg.Visible = True
+        tableauStatsJoueurs(numJoueur).Controls.Add(herbesImg)
+        Me.Controls.Add(herbesImg)
+
+        Dim herbes As Label = New Label
+        herbes.Text = "0"
+        herbes.Location = New Point(origine.X + largeurTile * 3, origine.Y + hauteurTile)
+        herbes.Size = New Size(largeurTile, hauteurTile)
+        herbes.Visible = True
+        herbes.BackColor = tableauStatsJoueurs(numJoueur).BackColor
+        herbes.TextAlign = ContentAlignment.MiddleCenter
+        tableauStatsJoueurs(numJoueur).Controls.Add(herbes)
+        Me.Controls.Add(herbes)
+
+        Dim pepitesImg As PictureBox = New PictureBox
+        pepitesImg.Location = New Point(origine.X + largeurTile * 4, origine.Y + hauteurTile)
+        pepitesImg.Size = New Size(largeurTile, hauteurTile)
+        pepitesImg.Image = My.Resources._or
+        pepitesImg.Visible = True
+        tableauStatsJoueurs(numJoueur).Controls.Add(pepitesImg)
+        Me.Controls.Add(pepitesImg)
+
+        Dim pepites As Label
+        pepites = New Label
+        pepites.Text = "0"
+        pepites.Location = New Point(origine.X + largeurTile * 5, origine.Y + hauteurTile)
+        pepites.Size = New Size(largeurTile, hauteurTile)
+        pepites.BackColor = tableauStatsJoueurs(numJoueur).BackColor
+        pepites.Visible = True
+        pepites.TextAlign = ContentAlignment.MiddleCenter
+        tableauStatsJoueurs(numJoueur).Controls.Add(pepites)
+        Me.Controls.Add(pepites)
+
+        tableauStatsJoueurs(numJoueur).Visible = True
+        Me.Controls.Add(tableauStatsJoueurs(numJoueur))
+    End Sub
+
+    Private Sub genererStatsGlobales()
         dynamitesRestantesImg = New PictureBox
         dynamitesRestantesImg.Location = New Point((taille + 1) * largeurTile, hauteurTile)
         dynamitesRestantesImg.Size = New Size(largeurTile, hauteurTile)
@@ -158,6 +265,16 @@
 
     Private Sub clic(ByVal sender As System.Object, ByVal e As System.EventArgs)
         dynamiter(sender, e)
+
+        If (indiceJoueurEnCours >= tableauJoueurs.Length - 2) Then 'Si c'était le dernier joueur alors on revient au début
+            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleur
+            indiceJoueurEnCours = 0
+            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
+        Else
+            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleur
+            indiceJoueurEnCours += 1
+            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
+        End If
     End Sub
 
     Private Sub piocher(ByVal sender As System.Object, ByVal e As System.EventArgs)
