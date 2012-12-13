@@ -9,8 +9,6 @@
     Dim terrainAffichage(taille, taille) As PictureBox
 
     Dim tableauJoueurs(5) As String
-    Dim dynamitesJoueurs() As Integer
-    Dim pepitesJoueurs() As Integer
     Dim indiceJoueurEnCours As Integer
 
     Dim tableauStatsJoueurs As List(Of Panel)
@@ -32,6 +30,8 @@
     Dim pepitesRestantes As Label
     Dim herbesRestantesImg As PictureBox
     Dim herbesRestantes As Label
+
+    Dim utiliserDynamite As CheckBox
 
     Private Sub chargementFenetre(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         Randomize()
@@ -77,11 +77,19 @@
             creerJoueur(i)
         Next
         tableauStatsJoueurs(0).BackColor = couleurSelect
+
+        utiliserDynamite = New CheckBox
+        utiliserDynamite.Appearance = Appearance.Button
+        utiliserDynamite.Image = My.Resources.dynamite
+        utiliserDynamite.Location = New Point((taille + 1) * largeurTile, hauteurTile * 2 + hauteurTile / 4)
+        utiliserDynamite.Size = New Size(largeurTile * 1.5, hauteurTile * 1.5)
+        utiliserDynamite.Visible = True
+        Me.Controls.Add(utiliserDynamite)
     End Sub
 
     Private Sub creerJoueur(ByVal numJoueur)
         tableauStatsJoueurs.Add(New Panel)
-        Dim origine As Point = New Point((taille + 1) * largeurTile, hauteurTile * (numJoueur + 1) * 2 + 5 * numJoueur + 20)
+        Dim origine As Point = New Point((taille + 1) * largeurTile, hauteurTile * (numJoueur + 1) * 2 + 5 * numJoueur + hauteurTile * 2)
         tableauStatsJoueurs(numJoueur).Name = "joueur" & numJoueur
         tableauStatsJoueurs(numJoueur).Location = origine
         tableauStatsJoueurs(numJoueur).Size = New Size(largeurTile * 6 + 5, hauteurTile * 2)
@@ -268,20 +276,42 @@
     End Sub
 
     Private Sub clic(ByVal sender As System.Object, ByVal e As System.EventArgs)
-        dynamiter(sender, e)
-
-        If (indiceJoueurEnCours >= tableauJoueurs.Length - 2) Then 'Si c'était le dernier joueur alors on revient au début
-            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleur
-            indiceJoueurEnCours = 0
-            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
+        Dim changerJoueur As Boolean = False
+        If (utiliserDynamite.Checked) Then
+            Dim tabTMP() As Control = Me.Controls.Find("dynamites_joueur" & indiceJoueurEnCours, True)
+            If (Int(tabTMP(0).Text) > 0) Then
+                changerJoueur = dynamiter(sender, e)
+                If (changerJoueur = True) Then
+                    tabTMP(0).Text = Int(tabTMP(0).Text) - 1
+                    utiliserDynamite.Checked = False
+                End If
+            Else
+                changerJoueur = piocher(sender, e)
+            End If
         Else
-            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleur
-            indiceJoueurEnCours += 1
-            tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
+            changerJoueur = piocher(sender, e)
+        End If
+
+        'On regarde s'il reste des pépites sinon le jeu est fini
+        If (Int(pepitesRestantes.Text) <= 0) Then
+            jeuFini()
+        End If
+
+        'On change de joueur
+        If (changerJoueur = True) Then
+            If (indiceJoueurEnCours >= tableauJoueurs.Length - 2) Then 'Si c'était le dernier joueur alors on revient au début
+                tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleur
+                indiceJoueurEnCours = 0
+                tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
+            Else
+                tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleur
+                indiceJoueurEnCours += 1
+                tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
+            End If
         End If
     End Sub
 
-    Private Sub piocher(ByVal sender As System.Object, ByVal e As System.EventArgs)
+    Private Function piocher(ByVal sender As System.Object, ByVal e As System.EventArgs) As Boolean
         Dim caseCliquee As PictureBox = sender
         Dim x As Integer = Int(caseCliquee.Location.X / largeurTile), y As Integer = Int(caseCliquee.Location.Y / hauteurTile)
 
@@ -298,25 +328,31 @@
                 pepitesRestantes.Text = Int(pepitesRestantes.Text) - 1
                 Dim tabTMP() As Control = Me.Controls.Find("pepites_joueur" & indiceJoueurEnCours, True)
                 tabTMP(0).Text = Int(tabTMP(0).Text) + 1
+                Return True
             Case CaseTerrain.DYNAMITE
                 terrain(x, y) = CaseTerrain.DYNAMITE_TROUVEE
                 terrainAffichage(x, y).Image = My.Resources.dynamite
                 dynamitesRestantes.Text = Int(dynamitesRestantes.Text) - 1
                 Dim tabTMP() As Control = Me.Controls.Find("dynamites_joueur" & indiceJoueurEnCours, True)
                 tabTMP(0).Text = Int(tabTMP(0).Text) + 1
+                Return True
             Case CaseTerrain.HERBE
                 terrain(x, y) = CaseTerrain.TERRE
                 terrainAffichage(x, y).Image = My.Resources.terre
+                Return True
         End Select
-    End Sub
 
-    Private Sub dynamiter(ByVal sender As System.Object, ByVal e As System.EventArgs)
+        Return False
+    End Function
+
+    Private Function dynamiter(ByVal sender As System.Object, ByVal e As System.EventArgs) As Boolean
         Dim caseCliquee As PictureBox = sender
         Dim x As Integer = Int(caseCliquee.Location.X / largeurTile), y As Integer = Int(caseCliquee.Location.Y / hauteurTile)
+        'On définit notre carré impact
         Dim origineX As Integer = x - 1, origineY As Integer = y - 1
         Dim finX As Integer = x + 1, finY As Integer = y + 1
 
-        'On calcule notre carré impact
+        'On règle les débordements (hors du terrain)
         If (origineX < 0) Then
             origineX = 0
         End If
@@ -330,11 +366,29 @@
             finX = taille - 1
         End If
 
+        Dim auMoinsUneCaseCliquable As Boolean = False
+        For i As Integer = origineX To finX
+            For j As Integer = origineY To finY
+                If terrain(x, y) = CaseTerrain.HERBE Or terrain(x, y) = CaseTerrain.PEPITE Or terrain(x, y) = CaseTerrain.DYNAMITE Then
+                    auMoinsUneCaseCliquable = True
+                End If
+            Next
+        Next
+        If (auMoinsUneCaseCliquable = False) Then
+            Return False
+        End If
+
+        'Dynamiter revient à piocher plusieurs cases
         For i As Integer = origineX To finX
             For j As Integer = origineY To finY
                 piocher(terrainAffichage(i, j), System.EventArgs.Empty)
             Next
         Next
-    End Sub
 
+        Return True
+    End Function
+
+    Private Sub jeuFini()
+        Me.Close()
+    End Sub
 End Class
