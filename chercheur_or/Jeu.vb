@@ -82,13 +82,13 @@
     Private Sub creerJoueur(ByVal numJoueur)
         tableauStatsJoueurs.Add(New Panel)
         Dim origine As Point = New Point((taille + 1) * largeurTile, hauteurTile * (numJoueur + 1) * 2 + 5 * numJoueur + 20)
+        tableauStatsJoueurs(numJoueur).Name = "joueur" & numJoueur
         tableauStatsJoueurs(numJoueur).Location = origine
         tableauStatsJoueurs(numJoueur).Size = New Size(largeurTile * 6 + 5, hauteurTile * 2)
         tableauStatsJoueurs(numJoueur).BackColor = couleur
         tableauStatsJoueurs(numJoueur).Visible = True
 
-        Dim nomJoueur As Label
-        nomJoueur = New Label
+        Dim nomJoueur As Label = New Label
         nomJoueur.Name = "joueur" & numJoueur
         nomJoueur.Text = tableauJoueurs(numJoueur)
         nomJoueur.Location = New Point(origine.X, origine.Y)
@@ -109,6 +109,7 @@
 
         Dim dynamites As Label = New Label
         dynamites.Text = "0"
+        dynamites.Name = "dynamites_joueur" & numJoueur
         dynamites.Location = New Point(origine.X + largeurTile, origine.Y + hauteurTile)
         dynamites.Size = New Size(largeurTile, hauteurTile)
         dynamites.Visible = True
@@ -126,6 +127,7 @@
         Me.Controls.Add(herbesImg)
 
         Dim herbes As Label = New Label
+        herbes.Name = "herbes_joueur" & numJoueur
         herbes.Text = "0"
         herbes.Location = New Point(origine.X + largeurTile * 3, origine.Y + hauteurTile)
         herbes.Size = New Size(largeurTile, hauteurTile)
@@ -143,9 +145,9 @@
         tableauStatsJoueurs(numJoueur).Controls.Add(pepitesImg)
         Me.Controls.Add(pepitesImg)
 
-        Dim pepites As Label
-        pepites = New Label
+        Dim pepites As Label = New Label
         pepites.Text = "0"
+        pepites.Name = "pepites_joueur" & numJoueur
         pepites.Location = New Point(origine.X + largeurTile * 5, origine.Y + hauteurTile)
         pepites.Size = New Size(largeurTile, hauteurTile)
         pepites.BackColor = tableauStatsJoueurs(numJoueur).BackColor
@@ -283,21 +285,28 @@
         Dim caseCliquee As PictureBox = sender
         Dim x As Integer = Int(caseCliquee.Location.X / largeurTile), y As Integer = Int(caseCliquee.Location.Y / hauteurTile)
 
+        If (terrain(x, y) = CaseTerrain.PEPITE Or terrain(x, y) = CaseTerrain.DYNAMITE Or terrain(x, y) = CaseTerrain.HERBE) Then
+            herbesRestantes.Text = Int(herbesRestantes.Text) - 1
+            Dim tabTMP() As Control = Me.Controls.Find("herbes_joueur" & indiceJoueurEnCours, True)
+            tabTMP(0).Text = Int(tabTMP(0).Text) + 1
+        End If
+
         Select Case terrain(x, y)
             Case CaseTerrain.PEPITE
                 terrain(x, y) = CaseTerrain.PEPITE_TROUVEE
                 terrainAffichage(x, y).Image = My.Resources._or
-                herbesRestantes.Text = Int(herbesRestantes.Text) - 1
                 pepitesRestantes.Text = Int(pepitesRestantes.Text) - 1
+                Dim tabTMP() As Control = Me.Controls.Find("pepites_joueur" & indiceJoueurEnCours, True)
+                tabTMP(0).Text = Int(tabTMP(0).Text) + 1
             Case CaseTerrain.DYNAMITE
                 terrain(x, y) = CaseTerrain.DYNAMITE_TROUVEE
                 terrainAffichage(x, y).Image = My.Resources.dynamite
-                herbesRestantes.Text = Int(herbesRestantes.Text) - 1
                 dynamitesRestantes.Text = Int(dynamitesRestantes.Text) - 1
+                Dim tabTMP() As Control = Me.Controls.Find("dynamites_joueur" & indiceJoueurEnCours, True)
+                tabTMP(0).Text = Int(tabTMP(0).Text) + 1
             Case CaseTerrain.HERBE
                 terrain(x, y) = CaseTerrain.TERRE
                 terrainAffichage(x, y).Image = My.Resources.terre
-                herbesRestantes.Text = Int(herbesRestantes.Text) - 1
         End Select
     End Sub
 
