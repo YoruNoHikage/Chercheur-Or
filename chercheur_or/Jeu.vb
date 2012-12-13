@@ -253,11 +253,13 @@
     Private Sub survolSouris(ByVal sender As System.Object, ByVal e As System.EventArgs)
         Dim caseSurvole As PictureBox = sender
 
-        If (coordonneesPrec.X >= 0 And coordonneesPrec.X < taille And coordonneesPrec.Y >= 0 And coordonneesPrec.Y < taille And terrain(coordonneesPrec.X, coordonneesPrec.Y) = CaseTerrain.HERBE) Then
+        'Permet d'effacer la case précédente sur laquelle la souris est passé
+        If (coordonneesPrec.X >= 0 And coordonneesPrec.X < taille And coordonneesPrec.Y >= 0 And coordonneesPrec.Y < taille And terrain(coordonneesPrec.X, coordonneesPrec.Y) <> CaseTerrain.TERRE And terrain(coordonneesPrec.X, coordonneesPrec.Y) <> CaseTerrain.PEPITE_TROUVEE And terrain(coordonneesPrec.X, coordonneesPrec.Y) <> CaseTerrain.DYNAMITE_TROUVEE) Then
             terrainAffichage(coordonneesPrec.X, coordonneesPrec.Y).Image = My.Resources.herbe
         End If
 
-        If (terrain(Int(caseSurvole.Location.X / largeurTile), Int(caseSurvole.Location.Y / hauteurTile)) = CaseTerrain.HERBE) Then
+        'Affiche un curseur sur la case que l'on survole
+        If (terrain(Int(caseSurvole.Location.X / largeurTile), Int(caseSurvole.Location.Y / hauteurTile)) <> CaseTerrain.TERRE And terrain(Int(caseSurvole.Location.X / largeurTile), Int(caseSurvole.Location.Y / hauteurTile)) <> CaseTerrain.PEPITE_TROUVEE And terrain(Int(caseSurvole.Location.X / largeurTile), Int(caseSurvole.Location.Y / hauteurTile)) <> CaseTerrain.DYNAMITE_TROUVEE) Then
             caseSurvole.Image = My.Resources.survol
             coordonneesPrec = New Point(Int(caseSurvole.Location.X / largeurTile), Int(caseSurvole.Location.Y / hauteurTile))
         End If
