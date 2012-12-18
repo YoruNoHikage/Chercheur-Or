@@ -1,5 +1,5 @@
 ﻿Public Class Jeu
-    Const taille As Integer = 20
+    Const taille As Integer = 10
     Const largeurTile As Integer = 35, hauteurTile As Integer = 35
 
     Dim couleurSelect As Color = ColorTranslator.FromHtml("0x008fff")
@@ -13,7 +13,7 @@
 
     Dim tableauStatsJoueurs As List(Of Panel)
 
-    Const nbPepites As Integer = 50, nbDynamites As Integer = 5
+    Const nbPepites As Integer = 10, nbDynamites As Integer = 5
 
     Enum CaseTerrain As Integer
         HERBE
@@ -395,6 +395,47 @@
     End Function
 
     Private Sub jeuFini()
+        Dim chaineScores As String = ""
+        Dim scores(tableauJoueurs.Length) As Single
+        'On calcule les scores pour chaque joueur
+        For i As Integer = 0 To tableauJoueurs.Length - 2
+            Dim tabTMP() As Control = Me.Controls.Find("pepites_joueur" & i, True)
+            Dim pepites As Integer = Int(tabTMP(0).Text)
+            Dim tabTMP2() As Control = Me.Controls.Find("herbes_joueur" & i, True)
+            Dim herbes As Integer = Int(tabTMP2(0).Text)
+            Dim tabTMP3() As Control = Me.Controls.Find("dynamites_joueur" & i, True)
+            Dim dynamites As Integer = Int(tabTMP3(0).Text)
+
+            Dim score As Single = (herbes + dynamites + pepites) / (pepites + 1) 'Permet de ne pas diviser par 0
+            If (i <> 0) Then
+                If (scores(i - 1) > score) Then
+                    scores(i) = scores(i - 1)
+                    scores(i - 1) = score
+
+                    Dim chaineTMP As String = tableauJoueurs(i - 1)
+                    tableauJoueurs(i - 1) = tableauJoueurs(i)
+                    tableauJoueurs(i) = chaineTMP
+                Else
+                    scores(i) = score
+                End If
+            Else
+                scores(i) = score
+            End If
+        Next
+        For i As Integer = 0 To tableauJoueurs.Length - 2
+            If (i <> 0) Then
+                If (scores(i - 1) = scores(i)) Then
+                    chaineScores += i.ToString
+                Else
+                    chaineScores += (i + 1).ToString
+                End If
+            Else
+                chaineScores += (i + 1).ToString
+            End If
+            chaineScores += ". " & tableauJoueurs(i) & " : "
+            chaineScores += scores(i) & vbCrLf
+        Next
+        MessageBox.Show(chaineScores)
         Me.Close()
     End Sub
 End Class
