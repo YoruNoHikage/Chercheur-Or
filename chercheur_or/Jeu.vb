@@ -13,7 +13,7 @@
 
     Dim tableauStatsJoueurs As List(Of Panel)
 
-    Const nbPepites As Integer = 10, nbDynamites As Integer = 5
+    Const nbPepites As Integer = 50, nbDynamites As Integer = 5
 
     Enum CaseTerrain As Integer
         HERBE
@@ -277,14 +277,12 @@
 
     Private Sub clic(ByVal sender As System.Object, ByVal e As System.EventArgs)
         Dim changerJoueur As Boolean = False
+        'On regarde si on doit utiliser une dynamite
         If (utiliserDynamite.Checked) Then
             Dim tabTMP() As Control = Me.Controls.Find("dynamites_joueur" & indiceJoueurEnCours, True)
+            'On regarde si on a des dynamites
             If (Int(tabTMP(0).Text) > 0) Then
                 changerJoueur = dynamiter(sender, e)
-                If (changerJoueur = True) Then
-                    tabTMP(0).Text = Int(tabTMP(0).Text) - 1
-                    utiliserDynamite.Checked = False
-                End If
             Else
                 changerJoueur = piocher(sender, e)
             End If
@@ -328,7 +326,7 @@
                 pepitesRestantes.Text = Int(pepitesRestantes.Text) - 1
                 Dim tabTMP() As Control = Me.Controls.Find("pepites_joueur" & indiceJoueurEnCours, True)
                 tabTMP(0).Text = Int(tabTMP(0).Text) + 1
-                Return True
+                Return False
             Case CaseTerrain.DYNAMITE
                 terrain(x, y) = CaseTerrain.DYNAMITE_TROUVEE
                 terrainAffichage(x, y).Image = My.Resources.dynamite
@@ -366,11 +364,16 @@
             finX = taille - 1
         End If
 
+        'Si aucune case n'est de l'herbe, alors on ne peut pas dynamiter
         Dim auMoinsUneCaseCliquable As Boolean = False
+        Dim changerJoueur As Boolean = True
         For i As Integer = origineX To finX
             For j As Integer = origineY To finY
                 If terrain(x, y) = CaseTerrain.HERBE Or terrain(x, y) = CaseTerrain.PEPITE Or terrain(x, y) = CaseTerrain.DYNAMITE Then
                     auMoinsUneCaseCliquable = True
+                    If terrain(x, y) = CaseTerrain.PEPITE Then
+                        changerJoueur = False
+                    End If
                 End If
             Next
         Next
@@ -384,8 +387,11 @@
                 piocher(terrainAffichage(i, j), System.EventArgs.Empty)
             Next
         Next
+        Dim tabTMP() As Control = Me.Controls.Find("dynamites_joueur" & indiceJoueurEnCours, True)
+        tabTMP(0).Text = Int(tabTMP(0).Text) - 1
+        utiliserDynamite.Checked = False
 
-        Return True
+        Return changerJoueur
     End Function
 
     Private Sub jeuFini()
