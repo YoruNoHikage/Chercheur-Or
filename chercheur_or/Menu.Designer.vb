@@ -37,6 +37,7 @@ Partial Class Menu
         Me.labelTailleGrille = New System.Windows.Forms.Label()
         Me.boutonJouerCreationGrille = New System.Windows.Forms.Button()
         Me.boutonMenuPrincipal = New System.Windows.Forms.Button()
+        Me.Label1 = New System.Windows.Forms.Label()
         Me.panelAccueil.SuspendLayout()
         Me.panelCreationGrille.SuspendLayout()
         Me.SuspendLayout()
@@ -79,6 +80,7 @@ Partial Class Menu
         '
         'panelCreationGrille
         '
+        Me.panelCreationGrille.Controls.Add(Me.Label1)
         Me.panelCreationGrille.Controls.Add(Me.panelDynamique)
         Me.panelCreationGrille.Controls.Add(Me.labelJoueurs)
         Me.panelCreationGrille.Controls.Add(Me.comboboxNbDynamites)
@@ -97,13 +99,13 @@ Partial Class Menu
         '
         Me.panelDynamique.Location = New System.Drawing.Point(23, 150)
         Me.panelDynamique.Name = "panelDynamique"
-        Me.panelDynamique.Size = New System.Drawing.Size(236, 117)
+        Me.panelDynamique.Size = New System.Drawing.Size(247, 117)
         Me.panelDynamique.TabIndex = 8
         '
         'labelJoueurs
         '
         Me.labelJoueurs.AutoSize = True
-        Me.labelJoueurs.Location = New System.Drawing.Point(20, 123)
+        Me.labelJoueurs.Location = New System.Drawing.Point(34, 134)
         Me.labelJoueurs.Name = "labelJoueurs"
         Me.labelJoueurs.Size = New System.Drawing.Size(44, 13)
         Me.labelJoueurs.TabIndex = 7
@@ -181,6 +183,15 @@ Partial Class Menu
         Me.boutonMenuPrincipal.Text = "Menu principal"
         Me.boutonMenuPrincipal.UseVisualStyleBackColor = True
         '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.Location = New System.Drawing.Point(131, 134)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(17, 13)
+        Me.Label1.TabIndex = 9
+        Me.Label1.Text = "IA"
+        '
         'Menu
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
@@ -228,4 +239,5 @@ Partial Class Menu
     Friend WithEvents comboboxTailleGrille As System.Windows.Forms.ComboBox
     Friend WithEvents boutonMenuPrincipal As System.Windows.Forms.Button
     Friend WithEvents panelDynamique As System.Windows.Forms.Panel
+    Friend WithEvents Label1 As System.Windows.Forms.Label
 End Class

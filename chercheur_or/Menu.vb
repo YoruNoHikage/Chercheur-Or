@@ -2,6 +2,10 @@
 
     Dim boutonNouveauJoueur As New Button
     Dim panelTexte As New Panel
+    'Création de trois listes, une comportant les boutons - , une autre comportant les joueurs, une autre comportant les joueurs virtuels
+    Dim listMoins As New List(Of Button)
+    Dim listJoueurs As New List(Of TextBox)
+    Dim listJoueursVirtuels As New List(Of CheckBox)
     'Chargement initial du menu
     Private Sub Menu_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'On afffiche uniquement l'écran d'accueil
@@ -26,27 +30,27 @@
         'Si l'on selectionne une grille 10*10
         If (comboboxTailleGrille.SelectedIndex = 0) Then
             comboboxNbPepites.Items.Insert(0, "10")
-            comboboxNbPepites.Items.Insert(1, "15")
-            comboboxNbPepites.Items.Insert(2, "20")
-            comboboxNbDynamites.Items.Insert(0, "10")
-            comboboxNbDynamites.Items.Insert(1, "15")
-            comboboxNbDynamites.Items.Insert(2, "20")
+            comboboxNbPepites.Items.Insert(1, "20")
+            comboboxNbPepites.Items.Insert(2, "30")
+            comboboxNbDynamites.Items.Insert(0, "3")
+            comboboxNbDynamites.Items.Insert(1, "4")
+            comboboxNbDynamites.Items.Insert(2, "5")
             'Paramètres pour une grille 15*15
         ElseIf (comboboxTailleGrille.SelectedIndex = 1) Then
             comboboxNbPepites.Items.Insert(0, "20")
-            comboboxNbPepites.Items.Insert(1, "25")
-            comboboxNbPepites.Items.Insert(2, "30")
-            comboboxNbDynamites.Items.Insert(0, "20")
-            comboboxNbDynamites.Items.Insert(1, "25")
-            comboboxNbDynamites.Items.Insert(2, "30")
+            comboboxNbPepites.Items.Insert(1, "40")
+            comboboxNbPepites.Items.Insert(2, "60")
+            comboboxNbDynamites.Items.Insert(0, "5")
+            comboboxNbDynamites.Items.Insert(1, "10")
+            comboboxNbDynamites.Items.Insert(2, "15")
             'Paramètres pour une grille 20*20
         ElseIf (comboboxTailleGrille.SelectedIndex = 2) Then
-            comboboxNbPepites.Items.Insert(0, "30")
-            comboboxNbPepites.Items.Insert(1, "35")
-            comboboxNbPepites.Items.Insert(2, "40")
-            comboboxNbDynamites.Items.Insert(0, "30")
-            comboboxNbDynamites.Items.Insert(1, "35")
-            comboboxNbDynamites.Items.Insert(2, "40")
+            comboboxNbPepites.Items.Insert(0, "50")
+            comboboxNbPepites.Items.Insert(1, "75")
+            comboboxNbPepites.Items.Insert(2, "100")
+            comboboxNbDynamites.Items.Insert(0, "15")
+            comboboxNbDynamites.Items.Insert(1, "20")
+            comboboxNbDynamites.Items.Insert(2, "25")
         End If
     End Sub
     'Si l'on clique sur le bouton jouer du menu principal
@@ -63,14 +67,13 @@
         Dim textboxJoueur1 As New TextBox
         textboxJoueur1.Size = New Size(80, 20)
         textboxJoueur1.Text = "Joueur 1"
-        textboxJoueur1.Location = New Point(27, 0)
         listJoueurs.Add(textboxJoueur1)
 
-        'On donne la possibilité à l'utilisateur d'ajouter d'autres joueurs grâce à un bouton ajouter un nouveau joueur
-        boutonNouveauJoueur = New Button
-        boutonNouveauJoueur.Size = New Size(110, 20)
-        boutonNouveauJoueur.Text = "Ajouter un joueur"
-        boutonNouveauJoueur.Location = New Point(115, 0)
+        'Ajout d'une chechbox pour l'ia joueur 1
+        Dim checkboxJoueur1 As New CheckBox
+        checkboxJoueur1.Size = New Size(15, 14)
+        checkboxJoueur1.Name = 1
+        listJoueursVirtuels.Add(checkboxJoueur1)
 
         'On ajoute un évenement sur notre bouton 
         AddHandler boutonNouveauJoueur.Click, AddressOf Me.boutonNouveauJoueur_Click
@@ -79,9 +82,6 @@
         Affichage()
     End Sub
 
-    'Création de deux listes, une comportant les boutons - et une autre comportant les joueurs
-    Dim listMoins As New List(Of Button)
-    Dim listJoueurs As New List(Of TextBox)
 
     'Lorsqu'on clique sur le bouton ajouter un nouveau joueur
     Private Sub boutonNouveauJoueur_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
@@ -93,6 +93,12 @@
         joueurX.Name = "joueur" & listJoueurs.Count + 1
         joueurX.Text = "Joueur " & listJoueurs.Count + 1
         listJoueurs.Add(joueurX)
+
+        'Ajout d'une checkbox pour l'ia joueur 1
+        Dim checkboxJoueurX As New CheckBox
+        checkboxJoueurX.Size = New Size(15, 14)
+        checkboxJoueurX.Name = listJoueursVirtuels.Count + 1
+        listJoueursVirtuels.Add(checkboxJoueurX)
 
         'On s'occupe maintenant d'ajouter un nouveau bouton moins qu'on enregistre dans notre liste de boutons moins
         Dim boutonMoins As Button
@@ -112,27 +118,35 @@
     Private Sub Affichage()
         'On efface tout ce que contient notre panel
         panelDynamique.Controls.Clear()
-
+        Dim positionX = 0
         'On donne une ordonnée pour notre premier bouton moins puis on affiche chaque bouton, en décalant de 20 pour éviter une superposition des boutons
-        Dim positiony As Integer = 30
+        Dim positionY As Integer = 30
         For Each moins As Button In listMoins
-            moins.Location = New Point(5, positiony)
+            moins.Location = New Point(positionX, positionY)
             panelDynamique.Controls.Add(moins)
-            positiony = positiony + 20
+            positionY = positionY + 20
         Next
 
         'Redéfinition de l'ordonnée et affichage de chaque bouton décalée de 20 d'ordonnée
         positiony = 10
         For Each joueur As TextBox In listJoueurs
-            joueur.Location = New Point(25, positiony)
+            joueur.Location = New Point(positionX + 25, positionY)
             panelDynamique.Controls.Add(joueur)
+            positionY = positionY + 20
+        Next
+        positionY = 10
+        For Each joueurVirtuel As CheckBox In listJoueursVirtuels
+            joueurVirtuel.Location = New Point(positionX + 110, positionY + 3)
+            panelDynamique.Controls.Add(joueurVirtuel)
             positiony = positiony + 20
         Next
 
         'On vérifie qu'il y a moins de 5 joueurs sinon cela sort de notre fenêtre
         If (listJoueurs.Count < 5) Then
             'Décalage de 20 d'ordonnée le bouton ajouter un nouveau joueur
-            boutonNouveauJoueur.Location = New Point(panelDynamique.Location.X + 100, positiony - 20)
+            boutonNouveauJoueur.Location = New Point(panelDynamique.Location.X + 105, positionY - 20)
+            boutonNouveauJoueur.Text = "Ajouter un joueur"
+            boutonNouveauJoueur.Size = New Size(100, 20)
             panelDynamique.Controls.Add(boutonNouveauJoueur)
         End If
     End Sub
@@ -141,19 +155,21 @@
     Private Sub enleverJoueur(ByVal sender As System.Object, ByVal e As System.EventArgs)
         'On recherche notre joueur à l'aide du nom de notre bouton moins sur lequel nous venons de cliquer
         Dim joueur As Object = listJoueurs.Item(Int(sender.Name))
-
+        Dim joueurVirtuel As Object = listJoueursVirtuels.Item(Int(sender.Name))
         'On supprime notre objet de type textbox joueur et notre objet bouton moins
         listJoueurs.Remove(joueur)
         listMoins.Remove(sender)
-
+        listJoueursVirtuels.Remove(joueurVirtuel)
         'On doit maintenant modifier les noms des boutonsMoins pour qu'ils permettent toujours de retrouver les bons joueurs
         For i = Int(sender.Name) To listMoins.Count
 
             'On récupère l'objet bouton moins et le textbox joueur
-            Dim joueurRecupere As Object = listJoueurs.Item(i), moinsRecupere As Object = listMoins.Item(i - 1)
+            Dim joueurRecupere As Object = listJoueurs.Item(i), moinsRecupere As Object = listMoins.Item(i - 1), joueurVirtuelRecupere As Object = listJoueursVirtuels.Item(i - 1)
 
             'On modifie le nom et le text de notre objet moins
             moinsRecupere.Name = Int(moinsRecupere.Name) - 1
+            joueurVirtuelRecupere.Name = Int(joueurVirtuelRecupere.Name) - 1
+
             If (joueurRecupere.Text = "Joueur " & i + 2) Then
                 joueurRecupere.Text = "Joueur " & i + 1
             End If
@@ -246,7 +262,7 @@
         'Affichage du panel dans le form Menu
         Me.Controls.Add(panelTexte)
     End Sub
-    'Lorsqu'on retourne au menu principal'
+    'Lorsqu'on retourne au menu principal
     Private Sub retour_menu_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles boutonMenuPrincipal.Click
         'On affiche uniquement l'écran d'accueil et le bouton crédit
         panelAccueil.Visible = True
@@ -261,16 +277,26 @@
     End Sub
 
     Private Sub boutonJouerCreationGrille_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles boutonJouerCreationGrille.Click
-        Dim tableauJoueurs(listJoueurs.Count()) As String
+        Dim tableauJoueurs(listJoueurs.Count() - 1) As String, tableauJoueursVirtuels(listJoueursVirtuels.Count() - 1) As Boolean
         Dim nbDynamites, nbPepites, tailleGrille
-        For i = 0 To listJoueurs.Count() - 1
-            tableauJoueurs(i) = listJoueurs.Item(i).Text
-        Next
         nbDynamites = comboboxNbDynamites.SelectedItem
         nbPepites = comboboxNbPepites.SelectedItem
         tailleGrille = comboboxTailleGrille.SelectedItem
 
-        Jeu.chargerDonnees(tableauJoueurs, tailleGrille, nbPepites, nbDynamites)
-        Jeu.ShowDialog()
+        If (nbDynamites <> Nothing And nbPepites <> Nothing And tailleGrille <> Nothing) Then
+            For i = 0 To listJoueurs.Count() - 1
+                tableauJoueurs(i) = listJoueurs.Item(i).Text
+
+                If (listJoueursVirtuels.Item(i).Checked) Then
+                    tableauJoueursVirtuels(i) = True
+                Else
+                    tableauJoueursVirtuels(i) = False
+                End If
+            Next
+                Jeu.chargerDonnees(tableauJoueurs, tableauJoueursVirtuels, tailleGrille, nbPepites, nbDynamites)
+                Jeu.ShowDialog()
+                Else
+                MessageBox.Show("Merci de remplir tous les champs !")
+                End If
     End Sub
 End Class

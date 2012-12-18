@@ -9,6 +9,7 @@
     Dim terrainAffichage(taille, taille) As PictureBox
 
     Dim tableauJoueurs() As String
+    Dim tableauJoueursVirtuels() As Boolean
     Dim indiceJoueurEnCours As Integer
 
     Dim tableauStatsJoueurs As List(Of Panel)
@@ -34,12 +35,12 @@
     Dim utiliserDynamite As CheckBox
 
     Dim chargementEffectue As Boolean = False
-    Public Sub chargerDonnees(ByVal joueurs(), ByVal tailleTerrain, ByVal pepites, ByVal dynamites)
+    Public Sub chargerDonnees(ByVal joueurs() As String, ByVal joueursVirtuels() As Boolean, ByVal tailleTerrain As Integer, ByVal pepites As Integer, ByVal dynamites As Integer)
         nbPepites = pepites
         nbDynamites = dynamites
         taille = tailleTerrain
         tableauJoueurs = joueurs
-
+        tableauJoueursVirtuels = joueursVirtuels
         ReDim terrain(taille, taille)
         ReDim terrainAffichage(taille, taille)
 
@@ -87,7 +88,7 @@
 
         tableauStatsJoueurs = New List(Of Panel)
 
-        For i As Integer = 0 To Int(tableauJoueurs.Length) - 2
+        For i As Integer = 0 To Int(tableauJoueurs.Length) - 1
             creerJoueur(i)
         Next
         tableauStatsJoueurs(0).BackColor = couleurSelect
@@ -289,6 +290,13 @@
         End If
     End Sub
 
+    Private Sub jouerIa()
+        Dim positionX As Integer = Int((taille - 1) * Rnd())
+        Dim positionY As Integer = Int((taille - 1) * Rnd())
+        Dim objet = terrainAffichage(positionX, positionY)
+        clic(objet, EventArgs.Empty)
+    End Sub
+
     Private Sub clic(ByVal sender As System.Object, ByVal e As System.EventArgs)
         Dim changerJoueur As Boolean = False
         'On regarde si on doit utiliser une dynamite
@@ -305,13 +313,15 @@
         End If
 
         'On regarde s'il reste des pépites sinon le jeu est fini
-        If (Int(pepitesRestantes.Text) <= 0) Then
+        If (Int(pepitesRestantes.Text) <= 0 And tableauJoueursVirtuels(indiceJoueurEnCours) = False) Then
             jeuFini()
+        ElseIf (Int(pepitesRestantes.Text) <= 0 And tableauJoueursVirtuels(indiceJoueurEnCours) = True) Then 'évite les double-fenêtres de scores
+            Return
         End If
 
         'On change de joueur
         If (changerJoueur = True) Then
-            If (indiceJoueurEnCours >= tableauJoueurs.Length - 2) Then 'Si c'était le dernier joueur alors on revient au début
+            If (indiceJoueurEnCours >= tableauJoueurs.Length - 1) Then 'Si c'était le dernier joueur alors on revient au début
                 tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleur
                 indiceJoueurEnCours = 0
                 tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
@@ -320,6 +330,12 @@
                 indiceJoueurEnCours += 1
                 tableauStatsJoueurs(indiceJoueurEnCours).BackColor = couleurSelect
             End If
+            'Si c'est une IA
+            If tableauJoueursVirtuels(indiceJoueurEnCours) = True Then
+                jouerIa()
+            End If
+        ElseIf changerJoueur = False And tableauJoueursVirtuels(indiceJoueurEnCours) = True Then
+            jouerIa()
         End If
     End Sub
 
