@@ -1,5 +1,5 @@
 ﻿Public Class Jeu
-    Const taille As Integer = 10
+    Dim taille As Integer
     Const largeurTile As Integer = 35, hauteurTile As Integer = 35
 
     Dim couleurSelect As Color = ColorTranslator.FromHtml("0x008fff")
@@ -8,12 +8,12 @@
     Dim terrain(taille, taille) As Integer
     Dim terrainAffichage(taille, taille) As PictureBox
 
-    Dim tableauJoueurs(5) As String
+    Dim tableauJoueurs() As String
     Dim indiceJoueurEnCours As Integer
 
     Dim tableauStatsJoueurs As List(Of Panel)
 
-    Const nbPepites As Integer = 10, nbDynamites As Integer = 5
+    Dim nbPepites As Integer, nbDynamites As Integer
 
     Enum CaseTerrain As Integer
         HERBE
@@ -33,7 +33,24 @@
 
     Dim utiliserDynamite As CheckBox
 
+    Dim chargementEffectue As Boolean = False
+    Public Sub chargerDonnees(ByVal joueurs(), ByVal tailleTerrain, ByVal pepites, ByVal dynamites)
+        nbPepites = pepites
+        nbDynamites = dynamites
+        taille = tailleTerrain
+        tableauJoueurs = joueurs
+
+        ReDim terrain(taille, taille)
+        ReDim terrainAffichage(taille, taille)
+
+        chargementEffectue = True
+    End Sub
+
     Private Sub chargementFenetre(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        If (chargementEffectue = False) Then
+            Me.Close()
+        End If
+
         Randomize()
 
         'Configuration de la fenêtre de base
@@ -41,6 +58,10 @@
         Me.Width = 1024
         Me.Height = 768
 
+        genererJeu()
+    End Sub
+
+    Public Sub genererJeu()
         'Création du terrain
         For i As Integer = 0 To taille - 1
             For j As Integer = 0 To taille - 1
@@ -63,13 +84,6 @@
 
         'Génération des statistiques (création dans le code pour plus de propreté et de précision)
         genererStatsGlobales()
-
-        'Création des joueurs et de leurs statistiques
-        tableauJoueurs(0) = "Jean-Jacques"
-        tableauJoueurs(1) = "Jean-Philippe"
-        tableauJoueurs(2) = "Francis"
-        tableauJoueurs(3) = "Jean-Kevin"
-        tableauJoueurs(4) = "Jean-Christophe"
 
         tableauStatsJoueurs = New List(Of Panel)
 
@@ -437,5 +451,10 @@
         Next
         MessageBox.Show(chaineScores)
         Me.Close()
+    End Sub
+
+    'Efface le contenu de la fenêtre pour éviter les superpositions si on relance la partie
+    Private Sub fermeture() Handles MyBase.FormClosed
+        Me.Dispose()
     End Sub
 End Class
