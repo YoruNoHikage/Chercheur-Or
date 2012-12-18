@@ -53,6 +53,8 @@
             comboboxNbDynamites.Items.Insert(2, "25")
         End If
     End Sub
+
+    Dim tmp As Boolean = False 'Sauve d'un bug de dernière minute
     'Si l'on clique sur le bouton jouer du menu principal
     Private Sub jouer_accueil_click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles boutonJouerAccueil.Click
         'On cache désormais l'écran d'accueil et on affiche l'écran des paramètres de création d'une partie, par ailleurs on affiche le bouton retour au menu principal et crédits
@@ -75,17 +77,18 @@
         checkboxJoueur1.Name = 1
         listJoueursVirtuels.Add(checkboxJoueur1)
 
-        'On ajoute un évenement sur notre bouton 
-        AddHandler boutonNouveauJoueur.Click, AddressOf Me.boutonNouveauJoueur_Click
+        'On ajoute un évenement sur notre bouton
+        If (tmp = False) Then
+            AddHandler boutonNouveauJoueur.Click, AddressOf Me.boutonNouveauJoueur_Click
+            tmp = True
+        End If
 
         'On affiche grâce à l'appel de notre fonction
         Affichage()
     End Sub
 
-
     'Lorsqu'on clique sur le bouton ajouter un nouveau joueur
     Private Sub boutonNouveauJoueur_Click(ByVal sender As System.Object, ByVal e As System.EventArgs)
-
         'On s'occupe maintenant d'ajouter un nouveau textbox joueur qu'on enregistre dans notre liste de joueurs
         Dim joueurX As TextBox
         joueurX = New TextBox
@@ -124,6 +127,11 @@
         For Each moins As Button In listMoins
             moins.Location = New Point(positionX, positionY)
             panelDynamique.Controls.Add(moins)
+            positionY = positionY + 20
+        Next
+        For Each check As CheckBox In listJoueursVirtuels
+            check.Location = New Point(positionX, positionY)
+            panelDynamique.Controls.Add(check)
             positionY = positionY + 20
         Next
 
@@ -274,6 +282,7 @@
         'On efface les anciens textbox joueurs et les boutons moins de nos listes
         listJoueurs.Clear()
         listMoins.Clear()
+        listJoueursVirtuels.Clear()
     End Sub
 
     Private Sub boutonJouerCreationGrille_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles boutonJouerCreationGrille.Click
@@ -293,10 +302,10 @@
                     tableauJoueursVirtuels(i) = False
                 End If
             Next
-                Jeu.chargerDonnees(tableauJoueurs, tableauJoueursVirtuels, tailleGrille, nbPepites, nbDynamites)
-                Jeu.ShowDialog()
-                Else
-                MessageBox.Show("Merci de remplir tous les champs !")
-                End If
+            Jeu.chargerDonnees(tableauJoueurs, tableauJoueursVirtuels, tailleGrille, nbPepites, nbDynamites)
+            Jeu.ShowDialog()
+        Else
+            MessageBox.Show("Merci de remplir tous les champs !")
+        End If
     End Sub
 End Class
